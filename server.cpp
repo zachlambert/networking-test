@@ -124,7 +124,8 @@ public:
                     sizeof(client_ip));
 
           client_fds_to_add.push_back(client_fd);
-          printf("New connection: from %s on socket %d", client_ip, client_fd);
+          // printf("New connection: from %s on socket %d\n", client_ip,
+          // client_fd);
           continue;
         }
 
@@ -136,15 +137,23 @@ public:
           continue;
         }
 
+        std::size_t index = 0;
+        while (index < client_fds.size()) {
+          if (client_fds[index] == poll_fd.fd) {
+            break;
+          }
+          index++;
+        }
+
         std::size_t message_len = strnlen(buffer, nbytes);
         if (message_len >= nbytes) {
           fprintf(stderr, "Invalid data received\n");
         }
-        printf("Received message:\n%s\n", buffer);
+        printf("[%zu] %s\n", index, buffer);
       }
 
       for (int client_fd : client_fds_to_add) {
-        printf("Adding connection %zu\n", client_fds.size());
+        printf("[New connection %zu]\n", client_fds.size());
         client_fds.push_back(client_fd);
         poll_fds.emplace_back();
         poll_fds.back().fd = client_fd;
@@ -153,15 +162,15 @@ public:
       }
       for (int client_fd : client_fds_to_remove) {
         std::size_t index = 0;
-        while (index < poll_fds.size()) {
+        while (index < client_fds.size()) {
           if (client_fds[index] == client_fd) {
             break;
           }
           index++;
         }
-        printf("Removing connection %zu\n", index);
+        printf("[Removing connection %zu]\n", index);
         client_fds.erase(client_fds.begin() + index);
-        poll_fds.erase(poll_fds.begin() + index);
+        poll_fds.erase(poll_fds.begin() + index + 1);
       }
     }
   }
