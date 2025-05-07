@@ -1,9 +1,13 @@
+#include "render.hpp"
 #include "tcp_client.hpp"
 #include <iostream>
 
 int main() {
   const std::string host = "localhost";
   const std::string port = "3490";
+
+  Grid grid(10);
+  grid(0, 0) = Pixel::Red;
 
   TcpClient client;
   client.connect(host, port);
